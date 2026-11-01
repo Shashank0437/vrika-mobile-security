@@ -1,4 +1,22 @@
 services:
+  postgres:
+    image: "postgres:latest"
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+    volumes:
+      - $HOME/Vrika/postgresql_data:/var/lib/postgresql
+    environment:
+      - POSTGRES_USER=prowler_admin
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=vrika_mobile_security
+    networks:
+      - vrika_network
+      - vrika-cloud-security_default
 
 
 
