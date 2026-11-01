@@ -114,6 +114,7 @@ def api_list_screenshots(request):
         for f in files[:30]:
             shots.append({
                 'name': f.name,
+                'mtime': int(f.stat().st_mtime),
                 'data': 'data:image/png;base64,' + b64encode(
                     f.read_bytes()).decode()})
     return make_api_response({'screenshots': shots}, 200)
