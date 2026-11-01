@@ -1,11 +1,16 @@
 # -*- coding: utf_8 -*-
 """Vrika REST API V 1."""
+import mimetypes
+from pathlib import Path
+
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 
 from vrika_mobile_security.StaticAnalyzer.models import (
     RecentScansDB,
+    StaticAnalyzerAndroid,
+    StaticAnalyzerIOS,
 )
 from vrika_mobile_security.Vrika.utils import (
     get_scan_logs,
@@ -41,6 +46,29 @@ from vrika_mobile_security.StaticAnalyzer.views.common.pdf import pdf
 from vrika_mobile_security.StaticAnalyzer.views.common.appsec import appsec_dashboard
 from vrika_mobile_security.StaticAnalyzer.views.windows import windows
 
+
+@request_method(['POST'])
+@csrf_exempt
+def api_app_icon(request):
+    """POST - App icon image for a scan."""
+    checksum = request.POST.get('hash', '')
+    if not is_md5(checksum):
+        return make_api_response({'error': 'Invalid Hash'}, 422)
+    icon = ''
+    for model in (StaticAnalyzerAndroid, StaticAnalyzerIOS):
+        row = model.objects.filter(MD5=checksum).only('ICON_PATH').first()
+        if row and row.ICON_PATH:
+            icon = row.ICON_PATH
+            break
+    dwd = Path(settings.DWD_DIR).resolve()
+    path = (dwd / Path(icon).name).resolve() if icon else None
+    if (not path or path.parent != dwd or not path.is_file()
+            or path.is_symlink()):
+        return make_api_response({'error': 'Icon not found'}, 404)
+    ctype = mimetypes.guess_type(path.name)[0] or 'image/png'
+    if not ctype.startswith('image/') or ctype == 'image/svg+xml':
+        return make_api_response({'error': 'Icon not found'}, 404)
+    return HttpResponse(path.read_bytes(), content_type=ctype)
 
 @request_method(['POST'])
 @csrf_exempt
