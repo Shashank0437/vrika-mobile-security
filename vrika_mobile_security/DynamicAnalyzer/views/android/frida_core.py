@@ -34,6 +34,7 @@ GADGET_SESSION_REQUIRED = (
     'Spawn & Inject with Frida first in Frida Gadget mode')
 _ACTIVE_SESSIONS = {}
 _ACTIVE_SESSIONS_LOCK = threading.RLock()
+_DETACH_REASONS = {}
 _SESSION_LOCKS = {}
 _SESSION_LOCKS_GUARD = threading.Lock()
 _SESSION_OWNER_PID = os.getpid()
@@ -208,6 +209,16 @@ class Frida:
                 entry = _ACTIVE_SESSIONS.get(key)
             if not entry:
                 self._release_owner()
+                with _ACTIVE_SESSIONS_LOCK:
+                    reason = _DETACH_REASONS.get(key)
+                if reason:
+                    self.last_error = (
+                        f'The app\'s Frida session ended ({reason}). '
+                        'Use Spawn & Inject to start a new session.')
+                else:
+                    self.last_error = (
+                        'No active Frida session for this app. Use Spawn & '
+                        'Inject first (or the last Spawn & Inject failed).')
                 return False
             script = None
             try:
@@ -461,18 +472,24 @@ class Frida:
                 script.on('message', self.frida_response)
                 script.load()
 
-                def detached(*_args):
+                def detached(reason=None, *_args):
                     removed = False
                     with _ACTIVE_SESSIONS_LOCK:
                         active = _ACTIVE_SESSIONS.get(key)
                         if active and active['session'] is session:
                             _ACTIVE_SESSIONS.pop(key, None)
+                            _DETACH_REASONS[key] = (
+                                str(reason or 'detached').replace('-', ' '))
                             removed = True
                     if removed:
+                        logger.warning(
+                            'Frida session detached: %s',
+                            sanitize_for_logging(str(reason)))
                         self._release_owner()
 
                 session.on('detached', detached)
                 with _ACTIVE_SESSIONS_LOCK:
+                    _DETACH_REASONS.pop(key, None)
                     _ACTIVE_SESSIONS[key] = {
                         'session': session,
                         'scripts': [script],
@@ -522,6 +539,7 @@ class Frida:
             finally:
                 if not registered:
                     with _ACTIVE_SESSIONS_LOCK:
+                        _DETACH_REASONS[key] = 'the last Spawn & Inject failed'
                         active = _ACTIVE_SESSIONS.get(key)
                         if active and active['session'] is session:
                             _ACTIVE_SESSIONS.pop(key, None)

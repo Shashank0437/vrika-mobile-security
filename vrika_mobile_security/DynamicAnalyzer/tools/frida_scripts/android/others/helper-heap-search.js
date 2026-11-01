@@ -20,7 +20,7 @@ Java.performNow(function () {
             {
                 var returnValue;
                 //{methodSignature}
-                returnValue = instance.{classMethod}({args}); //<-- replace v[i] with the value that you want to pass
+                returnValue = instance[classmethod](/* {args} */); //<-- pass the arguments you want to use
   
                 //Output
                 var s = "";
