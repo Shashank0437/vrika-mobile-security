@@ -1,0 +1,3 @@
+[submodule "vrika_mobile_security/StaticAnalyzer/test_files"]
+	path = vrika_mobile_security/StaticAnalyzer/test_files
+	url = https://github.com/MobSF/test_files.git

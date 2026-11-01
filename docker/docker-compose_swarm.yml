@@ -1,0 +1,54 @@
+services:
+
+  postgres:
+    image: "postgres:${POSTGRES_VERSION:-latest}"
+    restart: always
+    volumes:
+      - $HOME/Vrika/postgresql_data:/var/lib/postgresql
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD_FILE=/run/secrets/vrikaDB_password
+      - POSTGRES_DB=vrika_mobile_security
+    networks:
+        - vrika_network
+    secrets:
+      - vrikaDB_password
+
+  vrika_mobile_security:
+    image: ${VRIKA_IMAGE:-opensecurity/mobile-security-framework-vrika:latest}
+    restart: always
+    ports:
+     - "8000:8000"
+     - "1337:1337"
+    volumes:
+      - $HOME/Vrika/vrika_data:/home/vrika_mobile_security/.Vrika
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD_FILE=/run/secrets/vrikaDB_password
+      - POSTGRES_DB=vrika_mobile_security
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - VRIKA_API_KEY_FILE=/run/secrets/vrika_api_key
+      # Opt in only for a firewall-restricted host ADB server.
+      # Device discovery and Frida forwards then use host.docker.internal:
+      # - ADB_SERVER_SOCKET=tcp:host.docker.internal:5037
+    healthcheck:
+      test: curl -f http://localhost:8000/login/ || exit 1
+    depends_on:
+      - postgres
+    networks:
+      - vrika_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    secrets:
+      - vrikaDB_password
+      - vrika_api_key
+
+networks:
+  vrika_network:
+
+secrets:
+  vrikaDB_password:
+    external: true
+  vrika_api_key:
+    external: true

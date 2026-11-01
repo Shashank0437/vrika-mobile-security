@@ -1,0 +1,1 @@
+Github Issues are ONLY for reporting bugs and feature requests. For support, questions, queries and discussions use our slack channel. [Join Vrika Mobile Security Slack Channel](https://join.slack.com/t/vrika_mobile_security/shared_invite/zt-3ephptj6c-OuDMatJ9z9MT0T_Vb~l2pg)
