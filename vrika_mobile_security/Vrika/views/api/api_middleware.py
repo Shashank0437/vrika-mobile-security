@@ -43,7 +43,8 @@ class RestApiAuthMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         """Middleware to handle API Auth."""
-        if not request.path.startswith('/api/'):
+        # path_info excludes SCRIPT_NAME (e.g. /mobsf), so the check holds behind a prefix.
+        if not request.path_info.startswith('/api/'):
             return
         if request.method == 'OPTIONS':
             return make_api_response({}, 200)
