@@ -1,5 +1,5 @@
 services:
-  postgres:
+  mobile-security-postgres:
     image: "postgres:latest"
     restart: always
     deploy:
@@ -33,7 +33,7 @@ services:
       - POSTGRES_USER=prowler_admin
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=vrika_mobile_security
-      - POSTGRES_HOST=postgres-db
+      - POSTGRES_HOST=mobile-security-postgres
       - POSTGRES_PORT=5432
     networks:
       - vrika_network
@@ -52,7 +52,7 @@ services:
       - POSTGRES_USER=prowler_admin
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=vrika_mobile_security
-      - POSTGRES_HOST=postgres-db
+      - POSTGRES_HOST=mobile-security-postgres
       - POSTGRES_PORT=5432
       - VRIKA_ASYNC_ANALYSIS=1
       - VRIKA_SCRIPT_NAME=/mobsf/
