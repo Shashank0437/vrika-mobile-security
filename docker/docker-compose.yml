@@ -71,7 +71,10 @@ services:
     depends_on:
       - djangoq
     networks:
-      - vrika_network
+      vrika_network:
+        # Hostname without underscores so Django accepts the Host header from vrika-server.
+        aliases:
+          - mobile-security-engine
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
