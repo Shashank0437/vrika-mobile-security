@@ -6,7 +6,14 @@ from pathlib import Path
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 
-from vrika_mobile_security.Vrika.utils import is_md5
+from vrika_mobile_security.Vrika.utils import is_md5, strict_package_check
+from vrika_mobile_security.StaticAnalyzer.models import StaticAnalyzerAndroid
+from vrika_mobile_security.DynamicAnalyzer.tools.webproxy import (
+    get_flow_file,
+    get_flow_meta,
+    get_sorted_flows,
+    load_flows,
+)
 from vrika_mobile_security.Vrika.views.helpers import request_method
 from vrika_mobile_security.Vrika.views.api.api_middleware import make_api_response
 from vrika_mobile_security.DynamicAnalyzer.views.android import (
@@ -133,6 +140,30 @@ def api_touch_events(request):
     if resp.get('status') == 'ok':
         return make_api_response(resp, 200)
     return make_api_response(resp, 500)
+
+
+@request_method(['POST'])
+@csrf_exempt
+def api_web_traffic(request):
+    """POST - Captured HTTP(S) flows for an analysed app (or one flow)."""
+    checksum = request.POST.get('hash', '')
+    if not is_md5(checksum):
+        return make_api_response({'error': 'Invalid Hash'}, 422)
+    row = StaticAnalyzerAndroid.objects.filter(
+        MD5=checksum).only('PACKAGE_NAME').first()
+    package = row.PACKAGE_NAME if row else ''
+    if not package or not strict_package_check(package):
+        return make_api_response({'error': 'Package not found'}, 404)
+    flow_file = get_flow_file(package)
+    flows = load_flows(flow_file) if flow_file else []
+    flow_id = request.POST.get('flow_id', '').strip()
+    if flow_id:
+        for flow in flows:
+            if flow.id == flow_id:
+                return make_api_response(get_flow_meta(flow), 200)
+        return make_api_response({'error': 'Flow not found'}, 404)
+    return make_api_response(
+        {'project': package, 'sorted_flows': get_sorted_flows(flows)}, 200)
 
 
 @request_method(['POST'])

@@ -353,10 +353,11 @@ def touch(request, api=False):
         x = request.POST['x']
         y = request.POST['y']
         event = request.POST['event']
-        end_x = request.POST.get('end_x', 0)
-        end_y = request.POST.get('end_y', 0)
-        max_x = request.POST.get('max_x', 0)
-        max_y = request.POST.get('max_y', 0)
+        # String defaults: is_number() treats an int 0 as missing.
+        end_x = request.POST.get('end_x', '0')
+        end_y = request.POST.get('end_y', '0')
+        max_x = request.POST.get('max_x', '0')
+        max_y = request.POST.get('max_y', '0')
 
         if event == 'text':
             args = ['text', shlex.quote(x)]
