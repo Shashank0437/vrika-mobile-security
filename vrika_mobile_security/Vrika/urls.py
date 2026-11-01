@@ -129,6 +129,8 @@ urlpatterns = [
     re_path(r'^api/v1/android/mobsfy$', api_dz.api_mobsfy),
     re_path(r'^api/v1/android/screenshot$', api_dz.api_screenshot),
     re_path(r'^api/v1/android/screenshots$', api_dz.api_list_screenshots),
+    re_path(r'^api/v1/android/screen_cast$', api_dz.api_screen_cast),
+    re_path(r'^api/v1/android/touch_events$', api_dz.api_touch_events),
     re_path(r'^api/v1/android/adb_command$', api_dz.api_adb_execute),
     re_path(r'^api/v1/android/root_ca$', api_dz.api_root_ca),
     re_path(r'^api/v1/android/global_proxy$', api_dz.api_global_proxy),

@@ -114,6 +114,29 @@ def api_list_screenshots(request):
 
 @request_method(['POST'])
 @csrf_exempt
+def api_screen_cast(request):
+    """POST - Current device screen as a data URL."""
+    resp = operations.screen_cast(request, True)
+    if resp.get('status') == 'ok':
+        return make_api_response(resp, 200)
+    return make_api_response(resp, 500)
+
+
+@request_method(['POST'])
+@csrf_exempt
+def api_touch_events(request):
+    """POST - Send touch, swipe, key or text input to the device."""
+    if not {'x', 'y', 'event'}.issubset(request.POST):
+        return make_api_response(
+            {'error': 'Missing Parameters'}, 422)
+    resp = operations.touch(request, True)
+    if resp.get('status') == 'ok':
+        return make_api_response(resp, 200)
+    return make_api_response(resp, 500)
+
+
+@request_method(['POST'])
+@csrf_exempt
 def api_adb_execute(request):
     """POST - ADB execute API."""
     if 'cmd' not in request.POST:

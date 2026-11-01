@@ -319,7 +319,7 @@ def take_screenshot(request, api=False):
 @login_required
 @permission_required(Permissions.SCAN)
 @require_http_methods(['POST'])
-def screen_cast(request):
+def screen_cast(request, api=False):
     """ScreenCast."""
     data = {
         'status': 'failed',
@@ -328,21 +328,21 @@ def screen_cast(request):
         env = Environment(get_device(request))
         b64dat = env.screen_stream()
         if not b64dat:
-            return send_response(data)
+            return send_response(data, api)
         data = {
             'status': 'ok',
             'message': f'data:image/png;base64,{b64dat}'}
     except Exception as exp:
         logger.exception('Screen streaming')
         data['message'] = str(exp)
-    return send_response(data)
+    return send_response(data, api)
 # AJAX
 
 
 @login_required
 @permission_required(Permissions.SCAN)
 @require_http_methods(['POST'])
-def touch(request):
+def touch(request, api=False):
     """Sending Touch/Swipe/Text Events."""
     data = {
         'status': 'failed',
@@ -367,7 +367,7 @@ def touch(request):
                     or not is_number(end_y)
                     or not is_number(max_x)
                     or not is_number(max_y)):
-                return data
+                return send_response(data, api)
             width = max(1, int(float(max_x)))
             height = max(1, int(float(max_y)))
             max_screen_x = width - 1
@@ -430,7 +430,7 @@ def touch(request):
                 args = ['tap', touch_x, touch_y]
             else:
                 data['message'] = 'Unsupported input event'
-                return send_response(data)
+                return send_response(data, api)
         threading.Thread(target=env.adb_command,
                          args=(['input'] + args, True),
                          daemon=True).start()
@@ -438,7 +438,7 @@ def touch(request):
     except Exception as exp:
         logger.exception('Sending Touchscreen Events')
         data['message'] = str(exp)
-    return send_response(data)
+    return send_response(data, api)
 # AJAX
 
 
