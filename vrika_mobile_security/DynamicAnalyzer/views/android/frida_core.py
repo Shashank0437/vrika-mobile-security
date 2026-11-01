@@ -222,10 +222,23 @@ class Frida:
                     entry['scripts'].append(script)
                     logger.info('Loaded Frida script in the active session')
                     return True
-            except Exception:
+            except (frida.TransportError,
+                    frida.InvalidOperationError,
+                    frida.ProcessNotFoundError):
+                # The instrumented process exited or hung; drop the dead session.
+                logger.exception('Active Frida session is no longer usable')
+                with _ACTIVE_SESSIONS_LOCK:
+                    if _ACTIVE_SESSIONS.get(key) is entry:
+                        _ACTIVE_SESSIONS.pop(key, None)
+                self._release_owner()
+                self.last_error = (
+                    'The instrumented app is no longer responding (it may '
+                    'have exited). Use Spawn & Inject to start a new session.')
+                return False
+            except Exception as exp:
                 logger.exception('Failed to reuse the active Frida session')
                 self.last_error = (
-                    'Failed to inject into the active Frida session')
+                    f'Failed to inject into the active Frida session: {exp}')
                 if script:
                     try:
                         script.unload()
