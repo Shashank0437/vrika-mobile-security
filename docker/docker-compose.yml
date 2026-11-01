@@ -16,7 +16,6 @@ services:
       - POSTGRES_DB=vrika_mobile_security
     networks:
       - vrika_network
-      - vrika-cloud-security_default
 
 
 
@@ -37,7 +36,6 @@ services:
       - POSTGRES_PORT=5432
     networks:
       - vrika_network
-      - vrika-cloud-security_default
 
   vrika_mobile_security:
     image: opensecurity/mobile-security-framework-vrika:latest
@@ -71,12 +69,9 @@ services:
       - djangoq
     networks:
       - vrika_network
-      - vrika-cloud-security_default
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
 networks:
   vrika_network:
     driver: bridge
-  vrika-cloud-security_default:
-    external: true
