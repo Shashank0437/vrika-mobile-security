@@ -479,11 +479,14 @@ class Frida:
                 registered = True
                 logger.info('Frida session is active')
                 return True
-            except frida.NotSupportedError:
+            except frida.NotSupportedError as exp:
+                self.last_error = f'Frida operation not supported: {exp}'
                 logger.exception('Not Supported Error')
             except frida.ServerNotRunningError:
+                self.last_error = 'Frida server is not running on the device'
                 logger.warning('Frida server is not running')
             except frida.TimedOutError:
+                self.last_error = 'Timed out while waiting for the device'
                 logger.error('Timed out while waiting for device to appear')
             except frida.ProtocolError:
                 self.last_error = (
@@ -491,10 +494,15 @@ class Frida:
                     'ensure Frida major versions match and no other '
                     'Frida instance is holding port 27042')
                 logger.exception(self.last_error)
+            except frida.InvalidArgumentError as exp:
+                # Usually a JavaScript error in the combined hook/custom script.
+                self.last_error = f'Frida script error: {exp}'
+                logger.exception('Frida script rejected')
             except (frida.ProcessNotFoundError,
                     frida.ProcessNotRespondingError,
                     frida.TransportError,
-                    frida.InvalidOperationError):
+                    frida.InvalidOperationError) as exp:
+                self.last_error = f'Frida instrumentation failed: {exp}'
                 logger.exception('Frida instrumentation failed')
             except Exception:
                 logger.exception('Error Connecting to Frida')
