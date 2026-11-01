@@ -54,6 +54,8 @@ services:
       - POSTGRES_PORT=5432
       - VRIKA_ASYNC_ANALYSIS=1
       - VRIKA_SCRIPT_NAME=/mobsf/
+      # Shared with vrika-server MOBILE_SECURITY_API_KEY; empty falls back to the generated key.
+      - VRIKA_API_KEY=${VRIKA_API_KEY:-}
       - VRIKA_BRIDGE_SECRET=super_secret_vrika_key_6b6f64508eed98bbc9a76fc6e59daa1bf8
       # Opt in only for a firewall-restricted host ADB server.
       # Device discovery and Frida forwards then use host.docker.internal:
