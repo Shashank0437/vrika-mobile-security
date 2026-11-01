@@ -133,9 +133,36 @@
 if ($(".sidebar-collapse")[0])
 document.getElementById("nbar").style.display = "none";
 </script>
+<script>
+// Vrika dashboard nav bridge: report in-app path to the parent dashboard
+// and accept navigation requests from it (same-origin only).
+(function () {
+  var SCRIPT_NAME = "{{ request.META.SCRIPT_NAME|escapejs }}";
+  function strippedPath() {
+    var path = window.location.pathname;
+    if (SCRIPT_NAME && path.indexOf(SCRIPT_NAME) === 0) {
+      path = path.slice(SCRIPT_NAME.length);
+    }
+    return path || "/";
+  }
+  function postToParent() {
+    if (window.parent === window) { return; }
+    window.parent.postMessage(
+      { type: "vrika:pathname", path: strippedPath() },
+      window.location.origin
+    );
+  }
+  window.addEventListener("load", postToParent);
+  window.addEventListener("message", function (eMsg) {
+    if (eMsg.origin !== window.location.origin) { return; }
+    var msg = eMsg.data;
+    if (!msg || msg.type !== "vrika:navigate") { return; }
+    if (typeof msg.path !== "string" || msg.path.charAt(0) !== "/") { return; }
+    window.location.href = SCRIPT_NAME + msg.path;
+  });
+})();
+</script>
 {% block extra_scripts %}
-
 {% endblock %}
-
 </body>
 </html>

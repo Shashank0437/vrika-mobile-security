@@ -28,6 +28,7 @@ from vrika_mobile_security.Vrika.security import (
 )
 from vrika_mobile_security.Vrika.views import (
     authentication,
+    embed,
     authorization,
     home,
     saml2,
@@ -93,6 +94,10 @@ urlpatterns = [
     re_path(r'^sso/acs/$',
             saml2.saml_acs,
             name='saml_acs'),
+    # Vrika dashboard embed (HMAC token auth from vrika-server)
+    re_path(r'^vrika-embed/$',
+            embed.vrika_embed,
+            name='vrika_embed'),
     # REST API
     # Static Analysis
     re_path(r'^api/v1/upload$', api_sz.api_upload),

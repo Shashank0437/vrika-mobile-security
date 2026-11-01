@@ -54,6 +54,7 @@ services:
       - POSTGRES_PORT=5432
       - VRIKA_ASYNC_ANALYSIS=1
       - VRIKA_SCRIPT_NAME=/mobsf/
+      - VRIKA_BRIDGE_SECRET=super_secret_vrika_key_6b6f64508eed98bbc9a76fc6e59daa1bf8
       # Opt in only for a firewall-restricted host ADB server.
       # Device discovery and Frida forwards then use host.docker.internal:
       # - ADB_SERVER_SOCKET=tcp:host.docker.internal:5037

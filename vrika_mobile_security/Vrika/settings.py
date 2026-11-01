@@ -405,6 +405,8 @@ RATELIMIT = os.getenv('VRIKA_RATELIMIT', '7/m')
 USE_X_FORWARDED_HOST = env_flag('VRIKA_USE_X_FORWARDED_HOST', '1')
 USE_X_FORWARDED_PORT = env_flag('VRIKA_USE_X_FORWARDED_PORT', '1')
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# Same-origin embed in the Vrika dashboard iframe; cross-origin still blocked
+X_FRAME_OPTIONS = 'SAMEORIGIN'
 # ===========================
 # ENTERPRISE FEATURE REQUESTS
 # ===========================
@@ -418,6 +420,9 @@ IDP_X509CERT = os.getenv('VRIKA_IDP_X509CERT')
 IDP_IS_ADFS = env_flag('VRIKA_IDP_IS_ADFS', '0')
 IDP_MAINTAINER_GROUP = os.getenv('VRIKA_IDP_MAINTAINER_GROUP', 'Maintainer')
 IDP_VIEWER_GROUP = os.getenv('VRIKA_IDP_VIEWER_GROUP', 'Viewer')
+
+# Vrika dashboard embed bridge (HMAC token auth from vrika-server)
+VRIKA_BRIDGE_SECRET = os.getenv('VRIKA_BRIDGE_SECRET')
 # SP Configuration
 SP_HOST = os.getenv('VRIKA_SP_HOST')
 SP_ALLOW_PASSWORD = env_flag('VRIKA_SP_ALLOW_PASSWORD', '0')
