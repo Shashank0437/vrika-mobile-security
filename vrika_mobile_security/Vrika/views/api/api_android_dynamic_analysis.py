@@ -1,8 +1,12 @@
 # -*- coding: utf_8 -*-
 """Vrika REST API V 1."""
+from base64 import b64encode
+from pathlib import Path
 
+from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 
+from vrika_mobile_security.Vrika.utils import is_md5
 from vrika_mobile_security.Vrika.views.helpers import request_method
 from vrika_mobile_security.Vrika.views.api.api_middleware import make_api_response
 from vrika_mobile_security.DynamicAnalyzer.views.android import (
@@ -83,6 +87,29 @@ def api_screenshot(request):
     if resp['status'] == 'ok':
         return make_api_response(resp, 200)
     return make_api_response(resp, 500)
+
+
+@request_method(['POST'])
+@csrf_exempt
+def api_list_screenshots(request):
+    """POST - Captured screenshots as data URLs (newest first)."""
+    checksum = request.POST.get('hash', '')
+    if not is_md5(checksum):
+        return make_api_response({'error': 'Invalid Hash'}, 422)
+    screen_dir = Path(settings.UPLD_DIR) / checksum / 'screenshots-apk'
+    shots = []
+    if screen_dir.is_dir():
+        files = sorted(
+            (f for f in screen_dir.glob('*.png')
+             if f.is_file() and not f.is_symlink()),
+            key=lambda f: f.stat().st_mtime,
+            reverse=True)
+        for f in files[:30]:
+            shots.append({
+                'name': f.name,
+                'data': 'data:image/png;base64,' + b64encode(
+                    f.read_bytes()).decode()})
+    return make_api_response({'screenshots': shots}, 200)
 
 
 @request_method(['POST'])
