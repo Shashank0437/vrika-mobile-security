@@ -1,23 +1,5 @@
 services:
 
-  postgres:
-    image: "postgres:latest"
-    restart: always
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-        reservations:
-          memory: 512M
-    volumes:
-      - $HOME/Vrika/postgresql_data:/var/lib/postgresql
-    environment:
-      - POSTGRES_USER=prowler_admin
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=vrika_mobile_security
-    networks:
-      - vrika_network
-      - vrika-cloud-security_default
 
   nginx:
     image: nginx:latest
@@ -54,8 +36,6 @@ services:
       - POSTGRES_DB=vrika_mobile_security
       - POSTGRES_HOST=postgres-db
       - POSTGRES_PORT=5432
-    depends_on:
-      - postgres
     networks:
       - vrika_network
       - vrika-cloud-security_default
@@ -89,7 +69,6 @@ services:
       timeout: 10s
       retries: 5
     depends_on:
-      - postgres
       - djangoq
     networks:
       - vrika_network
